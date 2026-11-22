@@ -99,12 +99,39 @@ if (contactPhrase) {
   }, 2800);
 }
 
-menuButton.addEventListener('click', () => menu.showModal());
+const closeMenuButton = menu.querySelector('.panel form button');
+const hasNativeDialog = typeof menu.showModal === 'function';
+
+menuButton.addEventListener('click', () => {
+  if (menu.hasAttribute('open')) return;
+  if (hasNativeDialog) {
+    menu.showModal();
+  } else {
+    menu.classList.add('menu-fallback');
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-modal', 'true');
+    menu.setAttribute('open', '');
+    document.documentElement.classList.add('has-menu-fallback');
+    closeMenuButton.focus();
+  }
+  menuButton.setAttribute('aria-expanded', 'true');
+});
+
+function finishMenuClose() {
+  menuButton.setAttribute('aria-expanded', 'false');
+  if (hasNativeDialog) {
+    menu.close();
+  } else {
+    menu.removeAttribute('open');
+    document.documentElement.classList.remove('has-menu-fallback');
+    menuButton.focus({ preventScroll: true });
+  }
+}
 
 function closeMenu() {
-  if (menu.classList.contains('is-closing')) return;
+  if (!menu.hasAttribute('open') || menu.classList.contains('is-closing')) return;
   if (reducedMotion.matches) {
-    menu.close();
+    finishMenuClose();
     return;
   }
   menu.classList.add('is-closing');
@@ -113,7 +140,7 @@ function closeMenu() {
     panel.removeEventListener('animationend', finishClosing);
     clearTimeout(closeTimeout);
     menu.classList.remove('is-closing');
-    if (menu.open) menu.close();
+    if (menu.hasAttribute('open')) finishMenuClose();
   };
   const closeTimeout = setTimeout(finishClosing, 300);
   panel.addEventListener('animationend', finishClosing);
@@ -131,7 +158,26 @@ menu.addEventListener('click', event => {
   if (event.target === menu) closeMenu();
 });
 for (const link of menu.querySelectorAll('nav a')) {
-  link.addEventListener('click', () => menu.close());
+  link.addEventListener('click', finishMenuClose);
+}
+
+if (!hasNativeDialog) {
+  const menuControls = menu.querySelectorAll('button, a[href]');
+  const lastMenuControl = menuControls[menuControls.length - 1];
+  menu.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu();
+    }
+    if (event.key === 'Tab') {
+      const edge = event.shiftKey ? closeMenuButton : lastMenuControl;
+      const destination = event.shiftKey ? lastMenuControl : closeMenuButton;
+      if (document.activeElement === edge) {
+        event.preventDefault();
+        destination.focus();
+      }
+    }
+  });
 }
 
 const pointer = document.createElement('div');
@@ -192,7 +238,7 @@ window.addEventListener('pointermove', event => {
     hidePointer();
     return;
   }
-  const layer = menu.open ? menu : document.body;
+  const layer = menu.hasAttribute('open') ? menu : document.body;
   if (pointer.parentElement !== layer) layer.append(pointer);
   pointerPosition = { x: event.clientX, y: event.clientY };
   renderPointer();

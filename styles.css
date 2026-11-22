@@ -65,7 +65,10 @@ a.project-card:hover img { transform:scale(1.045); }
 .footer { display:grid; grid-template-columns:1fr 1fr auto; gap:1.25rem; border-top:1px solid var(--line); padding-top:1.5rem; }
 .footer nav,.contact-links { display:flex; flex-wrap:wrap; gap:.8rem; }
 dialog { width:100%; height:100%; max-width:none; max-height:none; inset:0; margin:0; padding:0; border:0; background:transparent; color:var(--ink); }
+#menu:not([open]) { display:none; }
 dialog[open] { display:grid; grid-template-columns:59% 41%; }
+.has-menu-fallback { overflow:hidden; }
+#menu.menu-fallback[open] { position:fixed; z-index:10; background:#090909a8; }
 dialog::backdrop { background:#090909a8; backdrop-filter:blur(5px); }
 .menu-art { display:grid; grid-template-columns:minmax(0,1fr); place-items:center; position:relative; overflow:hidden; color:white; pointer-events:none; }
 .menu-art img,.menu-art span { grid-area:1/1; }
@@ -88,8 +91,6 @@ dialog[open] .panel { animation:panel-in .32s ease-out both; }
  .portrait-tilt { width:36%; }
  .projects { grid-template-columns:1fr; }
  .bio,.footer { grid-template-columns:1fr; }
- dialog[open] { grid-template-columns:1fr; }
- .menu-art { display:none; }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
 
@@ -224,7 +225,32 @@ header { background:var(--grain),var(--paper); }
 @media (max-width:720px) {
   .hero { min-height:calc(84svh - 3.125rem); }
   .case-intro { grid-template-columns:1fr; }
-  .panel form { padding-right:1rem; }
+  #menu[open] {
+    position:fixed;
+    display:block;
+    height:100dvh;
+    overflow:hidden;
+    background:var(--paper);
+  }
+  #menu .menu-art { display:none; }
+  #menu .panel {
+    height:100%;
+    grid-template-rows:auto minmax(min-content,1fr) auto auto;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  #menu[open] .panel { animation:menu-mobile-in .22s ease-out both; }
+  #menu.is-closing .panel { animation:menu-mobile-out .22s ease-in both; }
+  .panel form { padding-right:max(1rem,env(safe-area-inset-right)); }
+  .panel form button { min-width:2.75rem; min-height:2.75rem; }
+  .panel nav a { padding-block:.25rem; }
+  .menu-bottom { padding-bottom:max(1.25rem,env(safe-area-inset-bottom)); }
+}
+@keyframes menu-mobile-in {
+  from { opacity:0; transform:translateX(1rem); }
+}
+@keyframes menu-mobile-out {
+  to { opacity:0; transform:translateX(1rem); }
 }
 @media (prefers-reduced-motion:reduce) {
   .site-pointer { transition:none; }
