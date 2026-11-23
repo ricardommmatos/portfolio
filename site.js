@@ -1,3 +1,6 @@
+if (location.pathname.endsWith('/index.html') && /^https?:$/.test(location.protocol)) {
+  location.replace('./' + location.search + location.hash);
+}
 
 const menu = document.querySelector('#menu');
 const languageButtons = document.querySelectorAll('[data-language]');
@@ -61,9 +64,11 @@ function applyLanguage(language) {
   for (const option of languageButtons) {
     option.setAttribute('aria-pressed', String(option.dataset.language === language));
   }
-  for (const link of document.querySelectorAll('a[href$=".html"], a[data-page]')) {
-    const destination = link.getAttribute('href').split('?')[0];
-    link.href = language === 'pt' ? destination + '?lang=pt' : destination;
+  for (const link of document.querySelectorAll('a[data-page]')) {
+    const destination = new URL(link.href);
+    if (language === 'pt') destination.searchParams.set('lang', 'pt');
+    else destination.searchParams.delete('lang');
+    link.href = destination.href;
   }
 }
 for (const button of languageButtons) {
