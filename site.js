@@ -96,6 +96,48 @@ if (skills && 'IntersectionObserver' in window) {
 
 const menuButton = document.querySelector('#menu-button');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+const resultCounts = document.querySelectorAll('.result-count');
+if (resultCounts.length && 'IntersectionObserver' in window && !reducedMotion.matches) {
+  const observer = new IntersectionObserver(entries => {
+    for (const { target, isIntersecting } of entries) {
+      if (!isIntersecting) continue;
+      observer.unobserve(target);
+
+      const finalValue = target.querySelector('.result-count-final');
+      const original = finalValue.textContent;
+      const parts = original.match(/^(\D*)([\d,.]+)(\D*)$/);
+      if (!parts || reducedMotion.matches) continue;
+
+      const [, prefix, digits, suffix] = parts;
+      const total = Number(digits.replace(/[,.]/g, ''));
+      const separator = digits.match(/[,.]/)?.[0];
+      const currentValue = document.createElement('span');
+      currentValue.className = 'result-count-current';
+      currentValue.setAttribute('aria-hidden', 'true');
+      target.append(currentValue);
+      target.classList.add('is-counting');
+
+      const start = performance.now();
+      function tick(now) {
+        const progress = Math.min(Math.max((now - start) / 1050, 0), 1);
+        if (progress === 1 || reducedMotion.matches || finalValue.textContent !== original) {
+          target.classList.remove('is-counting');
+          currentValue.remove();
+          return;
+        }
+        const count = Math.round(total * (1 - Math.pow(1 - progress, 3)));
+        let value = String(count);
+        if (separator) value = value.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+        currentValue.textContent = prefix + value + suffix;
+        requestAnimationFrame(tick);
+      }
+      tick(start);
+    }
+  }, { threshold: .5 });
+  resultCounts.forEach(result => observer.observe(result));
+}
+
 if (contactPhrase) {
   setInterval(() => {
     if (!reducedMotion.matches && !document.hidden) {

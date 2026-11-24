@@ -344,7 +344,24 @@ dialog.is-closing::backdrop { animation:page-in .25s ease-in reverse both; }
 .footer-intro strong { font-size:1.25rem; letter-spacing:-.06em; }
 .footer-intro .local-time { margin-top:auto; padding-top:1.6rem; text-align:left; }
 .footer-label { display:block; color:#626262; font-size:.75rem; letter-spacing:-.025em; margin-bottom:.65rem; }
-.footer-social a { text-decoration:none; }
+.footer-social .contact-links {
+  gap: 0.75rem;
+}
+
+.footer-social a {
+  text-decoration: none;
+  display: grid;
+  place-items: center;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+}
+
+.footer-social .social-icon {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: 0.25rem;
+  font-size: 1.125rem;
+}
 .social-icon {
   display:grid;
   place-items:center;
@@ -742,4 +759,28 @@ main > section:not(.hero) + #contact {
 }
 @media (min-width:761px) {
   .service-card { scroll-margin-top:13rem; }
+}
+
+#results {
+  scroll-margin-top: 5.5rem;
+}
+
+.result-count {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+
+.camaleao-outcomes .result-count span {
+  display: inline;
+  color: inherit;
+  margin: 0;
+}
+
+.result-count.is-counting .result-count-final {
+  opacity: 0;
+}
+
+.result-count-current {
+  position: absolute;
+  inset: 0 auto auto 0;
 }
