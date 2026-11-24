@@ -4,6 +4,8 @@ if (location.pathname.endsWith('/index.html') && /^https?:$/.test(location.proto
 
 const menu = document.querySelector('#menu');
 const languageButtons = document.querySelectorAll('[data-language]');
+const cvDownload = document.querySelector('a[data-cv-pt]');
+const englishCv = cvDownload?.getAttribute('href');
 const translatedText = Array.from(document.querySelectorAll('[data-pt]'), element => ({
   element,
   pt: element.dataset.pt,
@@ -57,6 +59,9 @@ function showContactPhrase() {
 function applyLanguage(language) {
   document.documentElement.lang = language;
   showContactPhrase();
+  if (cvDownload) {
+    cvDownload.href = language === 'pt' ? cvDownload.dataset.cvPt : englishCv;
+  }
   for (const { element, pt, en } of translatedText) {
     element.textContent = language === 'en' ? en : pt;
   }
